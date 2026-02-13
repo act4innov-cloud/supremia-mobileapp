@@ -1,0 +1,9 @@
+cat > .firebaserc << 'EOF'
+{
+  "projects": {
+    "default": "supremia-mobileapp",
+    "production": "supremia-mobileapp"
+  }
+}
+EOF
+echo "firebaserc OK"

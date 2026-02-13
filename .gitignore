@@ -1,0 +1,62 @@
+node_modules
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Expo
+.expo/
+dist/
+web-build/
+expo-env.d.ts
+
+# Native builds
+*.orig.*
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+
+# iOS
+ios/
+*.xcodeproj
+*.xcworkspace
+Pods/
+
+# Android
+android/
+*.apk
+*.aab
+
+# Environment
+.env
+.env.local
+.env.production
+
+# Firebase
+google-services.json
+GoogleService-Info.plist
+**/serviceAccountKey.json
+**/play-store-key.json
+.firebase/
+firebase-debug.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test
+coverage/
+
+# Build
+*.tsbuildinfo
+
+# EAS
+.easignore

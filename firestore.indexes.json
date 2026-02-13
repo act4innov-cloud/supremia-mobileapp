@@ -1,0 +1,12 @@
+{
+    "indexes": [
+      { "collectionGroup": "sensors", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "plantId", "order": "ASCENDING" }, { "fieldPath": "status", "order": "ASCENDING" }] },
+      { "collectionGroup": "sensors", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "unitId", "order": "ASCENDING" }, { "fieldPath": "type", "order": "ASCENDING" }] },
+      { "collectionGroup": "alerts", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "plantId", "order": "ASCENDING" }, { "fieldPath": "acknowledged", "order": "ASCENDING" }, { "fieldPath": "timestamp", "order": "DESCENDING" }] },
+      { "collectionGroup": "alerts", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "level", "order": "ASCENDING" }, { "fieldPath": "timestamp", "order": "DESCENDING" }] },
+      { "collectionGroup": "reports", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "plantId", "order": "ASCENDING" }, { "fieldPath": "generatedAt", "order": "DESCENDING" }] },
+      { "collectionGroup": "units", "queryScope": "COLLECTION", "fields": [{ "fieldPath": "plantId", "order": "ASCENDING" }, { "fieldPath": "status", "order": "ASCENDING" }] },
+      { "collectionGroup": "readings", "queryScope": "COLLECTION_GROUP", "fields": [{ "fieldPath": "sensorId", "order": "ASCENDING" }, { "fieldPath": "timestamp", "order": "DESCENDING" }] }
+    ],
+    "fieldOverrides": []
+  }

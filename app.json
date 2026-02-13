@@ -1,0 +1,20 @@
+{
+  "expo": {
+    "name": "SUPREMIA",
+    "slug": "supremia-platform",
+    "version": "1.0.0",
+    "scheme": "supremia",
+    "orientation": "portrait",
+    "userInterfaceStyle": "dark",
+    "splash": { "backgroundColor": "#1a1a2e" },
+    "ios": { "supportsTablet": true, "bundleIdentifier": "ma.ocp.supremia" },
+    "android": {
+      "adaptiveIcon": { "backgroundColor": "#1a1a2e" },
+      "package": "ma.ocp.supremia",
+      "googleServicesFile": "./google-services.json"
+    },
+    "web": { "bundler": "metro" },
+    "plugins": ["expo-router"],
+    "extra": { "router": { "origin": false } }
+  }
+}
