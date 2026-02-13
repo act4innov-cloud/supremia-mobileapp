@@ -1,105 +1,40 @@
-// ============================================================
-// SUPREMIA Platform - Gas Thresholds Configuration
-// Based on OCP Safety Standards & ISO 45001
-// ============================================================
+// ISO 45001 Gas Thresholds for OCP Industrial Plants
+export type GasType = 'H2S' | 'CO2' | 'CO' | 'NH3' | 'SO2' | 'NO2' | 'O2' | 'CH4';
 
-import { GasType, GasThreshold, AlertLevel } from '@/types/sensor.types';
-
-export const GAS_THRESHOLDS: Record<GasType, GasThreshold> = {
-  H2S: {
-    twa: 10,      // 10 ppm (8h TWA)
-    stel: 15,     // 15 ppm (15min STEL)
-    idlh: 100,    // 100 ppm (IDLH)
-    unit: 'ppm',
-  },
-  CO2: {
-    twa: 5000,    // 5000 ppm (8h TWA)
-    stel: 30000,  // 30000 ppm (15min STEL)
-    idlh: 40000,  // 40000 ppm (IDLH)
-    unit: 'ppm',
-  },
-  CO: {
-    twa: 25,      // 25 ppm (8h TWA)
-    stel: 100,    // 100 ppm (ceiling)
-    idlh: 1200,   // 1200 ppm (IDLH)
-    unit: 'ppm',
-  },
-  NH3: {
-    twa: 25,      // 25 ppm (8h TWA)
-    stel: 35,     // 35 ppm (15min STEL)
-    idlh: 300,    // 300 ppm (IDLH)
-    unit: 'ppm',
-  },
-  SO2: {
-    twa: 2,       // 2 ppm (8h TWA)
-    stel: 5,      // 5 ppm (15min STEL)
-    idlh: 100,    // 100 ppm (IDLH)
-    unit: 'ppm',
-  },
-  O2: {
-    twa: 19.5,    // 19.5% minimum safe level
-    stel: 23.5,   // 23.5% maximum safe level
-    idlh: 16,     // Below 16% immediately dangerous
-    unit: '%',
-  },
-  CH4: {
-    twa: 1000,    // 1000 ppm (TWA)
-    stel: 5000,   // 5000 ppm = 10% LEL
-    idlh: 25000,  // 50% LEL
-    unit: 'ppm',
-  },
-  NO2: {
-    twa: 3,       // 3 ppm (8h TWA)
-    stel: 5,      // 5 ppm (15min STEL)
-    idlh: 20,     // 20 ppm (IDLH)
-    unit: 'ppm',
-  },
-};
-
-// Determine alert level based on gas reading
-export function getAlertLevel(gasType: GasType, value: number): AlertLevel | null {
-  const threshold = GAS_THRESHOLDS[gasType];
-  if (!threshold) return null;
-
-  // Special handling for O2 (danger is LOW levels)
-  if (gasType === 'O2') {
-    if (value < threshold.idlh) return 'emergency';
-    if (value < threshold.twa) return 'critical';
-    if (value > threshold.stel) return 'warning'; // Too much O2 is also dangerous
-    return null;
-  }
-
-  // For all other gases (danger is HIGH levels)
-  if (value >= threshold.idlh) return 'emergency';
-  if (value >= threshold.stel) return 'critical';
-  if (value >= threshold.twa) return 'warning';
-  if (value >= threshold.twa * 0.8) return 'info'; // 80% of TWA
-
-  return null;
-}
-
-// Gas display configuration
-export const GAS_CONFIG: Record<GasType, {
+export interface GasThreshold {
+  type: GasType;
   name: string;
-  fullName: string;
+  unit: string;
+  twa: number;    // Time Weighted Average (8h)
+  stel: number;   // Short Term Exposure Limit (15min)
+  idlh: number;   // Immediately Dangerous to Life or Health
   color: string;
   icon: string;
-  dangerColor: string;
-}> = {
-  H2S: { name: 'H₂S', fullName: 'Hydrogène Sulfuré', color: '#FF6B35', icon: 'alert-circle', dangerColor: '#FF0000' },
-  CO2: { name: 'CO₂', fullName: 'Dioxyde de Carbone', color: '#4ECDC4', icon: 'cloud', dangerColor: '#FF4444' },
-  CO:  { name: 'CO',  fullName: 'Monoxyde de Carbone', color: '#FF6B6B', icon: 'alert-triangle', dangerColor: '#CC0000' },
-  NH3: { name: 'NH₃', fullName: 'Ammoniac', color: '#45B7D1', icon: 'droplet', dangerColor: '#FF6600' },
-  SO2: { name: 'SO₂', fullName: 'Dioxyde de Soufre', color: '#96CEB4', icon: 'wind', dangerColor: '#FF3300' },
-  O2:  { name: 'O₂',  fullName: 'Oxygène', color: '#2196F3', icon: 'heart', dangerColor: '#FF0000' },
-  CH4: { name: 'CH₄', fullName: 'Méthane', color: '#FFA726', icon: 'flame', dangerColor: '#FF0000' },
-  NO2: { name: 'NO₂', fullName: 'Dioxyde d\'Azote', color: '#AB47BC', icon: 'alert-octagon', dangerColor: '#CC0000' },
+}
+
+export const GAS_THRESHOLDS: Record<GasType, GasThreshold> = {
+  H2S: { type: 'H2S', name: 'Hydrogene Sulfure', unit: 'ppm', twa: 10, stel: 15, idlh: 100, color: '#FF5722', icon: 'skull-crossbones' },
+  CO2: { type: 'CO2', name: 'Dioxyde de Carbone', unit: 'ppm', twa: 5000, stel: 30000, idlh: 40000, color: '#607D8B', icon: 'cloud' },
+  CO:  { type: 'CO', name: 'Monoxyde de Carbone', unit: 'ppm', twa: 25, stel: 200, idlh: 1200, color: '#F44336', icon: 'fire' },
+  NH3: { type: 'NH3', name: 'Ammoniac', unit: 'ppm', twa: 25, stel: 35, idlh: 300, color: '#4CAF50', icon: 'flask' },
+  SO2: { type: 'SO2', name: 'Dioxyde de Soufre', unit: 'ppm', twa: 2, stel: 5, idlh: 100, color: '#FF9800', icon: 'alert-circle' },
+  NO2: { type: 'NO2', name: 'Dioxyde Azote', unit: 'ppm', twa: 3, stel: 5, idlh: 20, color: '#9C27B0', icon: 'alert-octagon' },
+  O2:  { type: 'O2', name: 'Oxygene', unit: '%', twa: 20.9, stel: 23.5, idlh: 16, color: '#2196F3', icon: 'weather-windy' },
+  CH4: { type: 'CH4', name: 'Methane', unit: '% LEL', twa: 10, stel: 25, idlh: 50, color: '#795548', icon: 'gas-cylinder' },
 };
 
-// Alert level colors and labels
-export const ALERT_COLORS: Record<AlertLevel, { bg: string; text: string; label: string; labelFr: string }> = {
-  info:      { bg: '#E3F2FD', text: '#1565C0', label: 'Info',      labelFr: 'Information' },
-  warning:   { bg: '#FFF3E0', text: '#E65100', label: 'Warning',   labelFr: 'Attention' },
-  critical:  { bg: '#FCE4EC', text: '#C62828', label: 'Critical',  labelFr: 'Critique' },
-  emergency: { bg: '#F44336', text: '#FFFFFF', label: 'Emergency', labelFr: 'Urgence' },
+export const getAlertLevel = (type: GasType, value: number): 'normal' | 'warning' | 'critical' | 'danger' => {
+  const t = GAS_THRESHOLDS[type];
+  if (type === 'O2') {
+    if (value < t.idlh) return 'danger';
+    if (value < 19.5) return 'critical';
+    if (value < 20.0 || value > t.stel) return 'warning';
+    return 'normal';
+  }
+  if (value >= t.idlh) return 'danger';
+  if (value >= t.stel) return 'critical';
+  if (value >= t.twa) return 'warning';
+  return 'normal';
 };
+
+export default GAS_THRESHOLDS;

@@ -1,23 +1,10 @@
-// ============================================================
-// SUPREMIA Platform - Sensors Screen
-// ============================================================
-
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, useWindowDimensions } from 'react-native';
+import { View, StyleSheet, ScrollView, useWindowDimensions, ActivityIndicator } from 'react-native';
 import { Text, Card, Chip, Searchbar, SegmentedButtons } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { GAS_CONFIG, ALERT_COLORS } from '@/config/gas.config';
-import { GasType, SensorStatus } from '@/types/sensor.types';
-
-const MOCK_SENSORS = [
-  { id: 's1', name: 'H2S-JFC01-001', type: 'H2S' as GasType, value: 4.2, unit: 'ppm', status: 'online' as SensorStatus, unitName: 'Acide Phosphorique', alert: null },
-  { id: 's2', name: 'CO2-JFC01-002', type: 'CO2' as GasType, value: 2800, unit: 'ppm', status: 'online' as SensorStatus, unitName: 'Acide Phosphorique', alert: null },
-  { id: 's3', name: 'H2S-JFC02-001', type: 'H2S' as GasType, value: 12.5, unit: 'ppm', status: 'warning' as SensorStatus, unitName: 'Acide Sulfurique', alert: 'warning' },
-  { id: 's4', name: 'NH3-SAP01-001', type: 'NH3' as GasType, value: 38, unit: 'ppm', status: 'critical' as SensorStatus, unitName: 'Granulation', alert: 'critical' },
-  { id: 's5', name: 'SO2-JFC02-002', type: 'SO2' as GasType, value: 1.1, unit: 'ppm', status: 'online' as SensorStatus, unitName: 'Acide Sulfurique', alert: null },
-  { id: 's6', name: 'O2-JFC03-001', type: 'O2' as GasType, value: 20.8, unit: '%', status: 'online' as SensorStatus, unitName: 'Engrais DAP', alert: null },
-];
+import { useSensors } from '@/hooks/useSensors';
 
 export default function SensorsScreen() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -25,12 +12,23 @@ export default function SensorsScreen() {
   const { width } = useWindowDimensions();
   const isTablet = width >= 768;
 
-  const filtered = MOCK_SENSORS.filter((s) => {
+  // Fetch all sensors (Jorf Lasfar and Safi)
+  const { sensors: jorfSensors, loading: jorfLoading } = useSensors({ plantId: 'jorf_lasfar' });
+  const { sensors: safiSensors, loading: safiLoading } = useSensors({ plantId: 'safi' });
+
+  const allSensors = [...jorfSensors, ...safiSensors];
+  const loading = jorfLoading || safiLoading;
+
+  const filtered = allSensors.filter((s) => {
     const matchesSearch = s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.unitName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesFilter = filter === 'all' || (filter === 'alerts' && s.alert) || (filter === 'offline' && s.status === 'offline');
     return matchesSearch && matchesFilter;
   });
+
+  if (loading) {
+    return <ActivityIndicator size="large" style={{ flex: 1, justifyContent: 'center' }} />;
+  }
 
   return (
     <ScrollView style={styles.container}>

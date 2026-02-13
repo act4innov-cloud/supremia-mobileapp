@@ -1,90 +1,76 @@
-// ============================================================
-// SUPREMIA Platform - Tab Navigation Layout
-// ============================================================
 
-import { Tabs } from 'expo-router';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Platform, useWindowDimensions } from 'react-native';
-import { useAuth } from '@/contexts/AuthContext';
+import { Slot, useRouter, useSegments } from 'expo-router';
+import { AuthProvider, useAuth } from '@/contexts/AuthContext';
+import { useEffect } from 'react';
+import { PaperProvider, MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
+import { useColorScheme } from 'react-native';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { MQTTProvider } from '@/contexts/MQTTContext';
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
 
-export default function TabLayout() {
-  const { profile } = useAuth();
-  const { width } = useWindowDimensions();
-  const isTablet = width >= 768;
+SplashScreen.preventAutoHideAsync();
 
-  const isAdmin = profile?.role === 'admin' || profile?.role === 'supervisor';
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 30000,
+      retry: 2,
+    },
+  },
+});
+
+const supremiaColors = {
+  primary: '#e94560',
+  secondary: '#0f3460',
+  tertiary: '#16213e',
+  surface: '#1a1a2e',
+};
+
+const InitialLayout = () => {
+  const { user, initialized } = useAuth();
+  const segments = useSegments();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!initialized) return;
+
+    const inAuthGroup = segments[0] === '(auth)';
+
+    if (user && !inAuthGroup) {
+      router.replace('/(tabs)/dashboard');
+    } else if (!user) {
+      router.replace('/(auth)/login');
+    }
+  }, [user, initialized, segments, router]);
+
+  useEffect(() => {
+    SplashScreen.hideAsync();
+  }, []);
+
+  return <Slot />;
+};
+
+const RootLayout = () => {
+  const colorScheme = useColorScheme();
+
+  const theme =
+    colorScheme === 'dark'
+      ? { ...MD3DarkTheme, colors: { ...MD3DarkTheme.colors, ...supremiaColors } }
+      : { ...MD3LightTheme, colors: { ...MD3LightTheme.colors, primary: supremiaColors.primary } };
 
   return (
-    <Tabs
-      screenOptions={{
-        headerShown: true,
-        headerStyle: { backgroundColor: '#1a1a2e' },
-        headerTintColor: '#fff',
-        tabBarStyle: {
-          backgroundColor: '#16213e',
-          borderTopColor: '#0f3460',
-          height: Platform.OS === 'ios' ? 88 : 64,
-          paddingBottom: Platform.OS === 'ios' ? 28 : 8,
-        },
-        tabBarActiveTintColor: '#e94560',
-        tabBarInactiveTintColor: '#666',
-        tabBarLabelStyle: {
-          fontSize: isTablet ? 13 : 11,
-        },
-      }}
-    >
-      <Tabs.Screen
-        name="dashboard"
-        options={{
-          title: 'Dashboard',
-          headerTitle: 'SUPREMIA - Dashboard',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="view-dashboard" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="sensors"
-        options={{
-          title: 'Capteurs',
-          headerTitle: 'Capteurs IoT',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="gauge" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="cameras"
-        options={{
-          title: 'Caméras',
-          headerTitle: 'Caméras PTZ',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="cctv" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="reporting"
-        options={{
-          title: 'Rapports',
-          headerTitle: 'Reporting & Archives',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="file-chart" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="admin"
-        options={{
-          title: 'Admin',
-          headerTitle: 'Administration',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="cog" size={size} color={color} />
-          ),
-          // Hide admin tab for non-admin users
-          href: isAdmin ? undefined : null,
-        }}
-      />
-    </Tabs>
+    <QueryClientProvider client={queryClient}>
+      <PaperProvider theme={theme}>
+        <AuthProvider>
+          <MQTTProvider>
+            <StatusBar style="auto" />
+            <InitialLayout />
+          </MQTTProvider>
+        </AuthProvider>
+      </PaperProvider>
+    </QueryClientProvider>
   );
-}
+};
+
+export default RootLayout;
