@@ -15,8 +15,23 @@ declare namespace NodeJS {
     EXPO_PUBLIC_INAPP_HOSTS?: string;
     /** URL de l'API (Phase 2, app native). */
     EXPO_PUBLIC_API_URL?: string;
-    /** URL du broker MQTT (Phase 2, app native). */
+
+    // --- Broker MQTT ---------------------------------------------------------
+    // ATTENTION : tout ce qui suit est prefixé EXPO_PUBLIC_, donc COMPILE DANS
+    // L'APK. Le mot de passe est extractible par quiconque décompile l'app.
+    // Voir docs/MQTT_SECURITY.md : le compte doit être en lecture seule.
+
+    /** URL WebSocket du broker, utilisée par l'app (`wss://...`). */
     EXPO_PUBLIC_MQTT_URL?: string;
+    /** URL MQTTS directe (`mqtts://...`), réservée aux capteurs et au backend. */
+    EXPO_PUBLIC_MQTT_URL_TLS?: string;
+    /** Identifiant MQTT. */
+    EXPO_PUBLIC_MQTT_USER?: string;
+    /** Mot de passe MQTT. Guillemets obligatoires s'il contient un `#`. */
+    EXPO_PUBLIC_MQTT_PASSWORD?: string;
+    /** Topic wildcard souscrit par l'app. Guillemets obligatoires s'il contient un `#`. */
+    EXPO_PUBLIC_MQTT_TOPIC?: string;
+
     EXPO_PUBLIC_FIREBASE_API_KEY?: string;
     EXPO_PUBLIC_FIREBASE_PROJECT_ID?: string;
   }
