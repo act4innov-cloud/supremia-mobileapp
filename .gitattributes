@@ -1,0 +1,25 @@
+# Normalise les fins de ligne : le dépôt est en LF.
+# Indispensable car le développement se fait sous Windows (autocrlf) alors que
+# les builds EAS et Metro tournent sous Linux. Sans cela, chaque machine
+# réécrit tous les fichiers et génère des diffs illisibles.
+* text=auto eol=lf
+
+# Scripts Windows : CRLF requis par PowerShell.
+*.ps1 text eol=crlf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Fichiers binaires : aucune conversion.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.ttf binary
+*.otf binary
+*.mp4 binary
+*.pdf binary
+*.keystore binary
+*.jks binary
+
+# Verrouille la forme des lockfiles et des fichiers de config sensibles au diff.
+package-lock.json -diff

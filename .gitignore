@@ -1,0 +1,29 @@
+node_modules/
+.expo/
+dist/
+dist-check/
+web-build/
+expo-env.d.ts
+
+# Généré par `npx expo prebuild`
+/android
+/ios
+
+# Secrets
+.env
+.env.local
+.env.production
+google-services.json
+GoogleService-Info.plist
+*.keystore
+*.jks
+
+# EAS
+eas-build-*.log
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+*.log
+.idea/
+.vscode/
