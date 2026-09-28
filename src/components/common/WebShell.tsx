@@ -38,6 +38,12 @@ type Props = {
   /** Notifie le parent de l'état de l'historique (bouton retour Android). */
   onCanGoBackChange?: (canGoBack: boolean) => void;
   onMessage?: (message: { type: string; [key: string]: unknown }) => void;
+  /**
+   * Contenu additionnel à gauche des boutons d'action de la barre d'outils.
+   * Injecté par l'écran appelant plutôt que routé ici, pour que ce composant
+   * reste indépendant d'expo-router.
+   */
+  headerRight?: React.ReactNode;
 };
 
 /**
@@ -73,7 +79,7 @@ const UNSAFE_SCHEMES = /^(mailto:|tel:|sms:|whatsapp:|geo:|market:|intent:|bitco
 type WebViewHttpErrorShape = { statusCode: number; description: string; url: string };
 
 export const WebShell = forwardRef<WebShellHandle, Props>(function WebShell(
-  { url, style, hideHeader = false, onCanGoBackChange, onMessage },
+  { url, style, hideHeader = false, onCanGoBackChange, onMessage, headerRight },
   ref,
 ) {
   const webviewRef = useRef<WebView>(null);
@@ -186,6 +192,7 @@ export const WebShell = forwardRef<WebShellHandle, Props>(function WebShell(
               {prettyHost(currentUrl)}
             </Text>
           </View>
+          {headerRight}
           <HeaderButton
             icon="share-outline"
             onPress={() => void Share.share({ message: currentUrl })}

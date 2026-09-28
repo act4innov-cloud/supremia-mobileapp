@@ -13,6 +13,7 @@ Checklist pour brancher cette app sur votre plateforme. Plus c'est rempli vite, 
 | 5 | **Logo** | `npm run icons` | ⚠️ intégré depuis `OIG1.jpeg` (351×351, JPEG) |
 | 6 | **Compte de test** sur la plateforme | test de l'app | ⏳ de votre côté |
 | 7 | **Protection Edge Access** | `EXPO_PUBLIC_INAPP_HOSTS` | ⚠️ voir ci-dessous |
+| 8 | **Compte HiveMQ** | `EXPO_PUBLIC_MQTT_USER` / `PASSWORD` | ⚠️ refusé par le broker |
 
 Le fichier `.env` est déjà créé avec les bonnes valeurs (il est ignoré par git, donc non commité).
 
@@ -88,24 +89,82 @@ npm run icons -- --Source "C:\chemin\logo-1024.png"
 
 | # | Élément | Pourquoi |
 |---|---|---|
-| 7 | **Documentation API** (OpenAPI/JSON ou tableau des endpoints) | écrans dashboard, unités, admin |
-| 8 | **Schéma d'authentification** (JWT ? OAuth ? expiration ?) | Firebase Auth ou client HTTP |
-| 9 | **`google-services.json`** (Firebase Android) | notifications natives, Firestore |
-| 10 | **Broker MQTT** : URL, port, topic racine, identifiants de test | flux capteurs temps réel |
-| 11 | **Topics MQTT** + format des messages (payload d'exemple) | parsing dans `useMQTT` |
-| 12 | **Modèle de données** : unité, capteur, seuil, alerte | types TypeScript |
-| 13 | **Format des rapports** (PDF/CSV) et endpoint d'export | module reporting |
-| 14 | Protocole des flux caméras (RTSP, HLS, WebRTC ?) | lecteur vidéo natif |
+| 1 | **Documentation API** (OpenAPI/JSON ou tableau des endpoints) | écrans dashboard, unités, admin |
+| 2 | **Schéma d'authentification** (JWT ? OAuth ? expiration ?) | Firebase Auth ou client HTTP |
+| 3 | **`google-services.json`** (Firebase Android) | notifications natives, Firestore |
+| 4 | **Modèle de données** : unité, capteur, seuil, alerte | types TypeScript |
+| 5 | **Format des rapports** (PDF/CSV) et endpoint d'export | module reporting |
+| 6 | Protocole des flux caméras (RTSP, HLS, WebRTC ?) | lecteur vidéo natif |
+| 7 | **Règles de permissions** : rôles et actions protégées | `src/utils/permissions.ts` |
+| 8 | **Contraintes des formulaires** d'administration | `src/utils/validators.ts` |
 
-> La plateforme web utilise déjà du **WebSocket / MQTT**. Pour la Phase 2, l'item 10 est le plus
-> important : le broker existe déjà, il suffit d'en connaître l'URL et les topics, qui pourront être
-> réutilisés tels quels par le client natif.
+> Le broker MQTT, les topics et le format des messages ne sont plus à fournir : la configuration a
+> été relevée sur la plateforme web, et le client natif est écrit, testé et compilé. Voir la
+> section « Configuration MQTT » plus bas.
+
+---
+
+## ⚠️ Point bloquant : compte HiveMQ Cloud
+
+Le code MQTT est écrit, compilé et testé. Il reste un seul obstacle : **le compte refuse la
+connexion**.
+
+Testé depuis cette machine, sur les ports 8884 (WebSocket) et 8883 (TLS) :
+
+```
+Connection refused: Not authorized
+```
+
+Ce n'est pas un problème de transport ni de réseau : les deux ports acceptent la connexion TCP, un
+broker de contrôle (`test.mosquitto.org`) répond correctement, et le message est renvoyé par le
+broker lui-même. Le diagnostic a aussi écarté une restriction par `clientId` : neuf préfixes
+différents ont été essayés, tous refusés de façon identique.
+
+### Ce qu'il faut vérifier dans la console HiveMQ
+
+Sur le cluster `b7f86ed7` :
+
+1. L'utilisateur `supremia` **existe** et n'a pas été supprimé.
+2. Son **statut** est *enabled*, et son **invitation a été acceptée**.
+3. L'utilisateur a le droit de **s'abonner** à `supremia/#`. Un utilisateur sans droit
+   d'abonnement est refusé dès l'étape CONNECT, avec le même message que pour un mot de passe faux.
+4. L'essai n'a pas expiré.
+
+> ⚠️ HiveMQ renvoie un message **identique** pour un mot de passe incorrect et pour un utilisateur
+> inexistant. L'erreur ne permet donc pas de distinguer les deux cas.
+
+### Tester après correction
+
+L'app affiche la cause de l'échec : le bandeau rouge « Connexion refusée » indique le motif exact.
+Tant que le compte n'est pas réparé, `EXPO_PUBLIC_MQTT_SIMULATE=true` permet d'utiliser et de
+démontrer les écrans de supervision.
+
+---
+
+## ✅ Résolu : configuration MQTT
+
+Ces éléments étaient inconnus au départ et ont été relevés sur la plateforme web publique, sans
+accéder à vos identifiants.
+
+| Élément | Valeur |
+|---|---|
+| Broker WebSocket | `wss://b7f86ed758d34f50b801c7ca5e52951e.s1.eu.hivemq.cloud:8884/mqtt` |
+| Broker TLS direct | `mqtts://b7f86ed758d34f50b801c7ca5e52951e.s1.eu.hivemq.cloud:8883` |
+| Topic | `supremia/#` (donc `supremia/data/<client>`) |
+| Client ID | préfixe libre ; l'app utilise `ocp_mobile_*` |
+| Client MQTT | mqtt.js 5, `clean: true`, keepalive 60 s, reconnexion toutes les 5 s |
+| Champs du payload | `sensor_name`, `sensor_id`, `type`, `location`, `temperature`, `humidity`, `h2s_ppm`, `co_ppm`, `co2_ppm`, `h2s_status`, `co_status`, `co2_status`, `status`, `wifi_rssi`, `publish_count` |
+
+À noter : la plateforme web publique utilisait jusque-là le broker **public** `test.mosquitto.org`,
+où n'importe qui pouvait lire *et injecter* de fausses mesures. Le broker privé HiveMQ corrige ce
+problème — à condition que le compte soit réparé.
 
 ## Utile mais non bloquant
 
 - Maquettes Figma ou captures des écrans à migrer en priorité
 - Les comptes de rôle `admin` / `user` pour valider les écrans d'administration
-- Règles de seuil et convention de nommage des unités (pour la cohérence des libellés)
+- Règles de seuil validées par votre responsable HSE (voir `src/config/gas.config.ts`)
+- Convention de nommage des unités, pour la cohérence des libellés
 
 ## ⚠️ Sécurité
 
@@ -113,4 +172,7 @@ npm run icons -- --Source "C:\chemin\logo-1024.png"
   `.gitignore`.
 - Les variables `EXPO_PUBLIC_*` sont **compilées dans l'APK** et donc extractibles. N'y mettez que
   des clés publiques (`EXPO_PUBLIC_FIREBASE_API_KEY` est conçue pour cela) et des URLs.
-- Les vrais secrets (mot de passe MQTT, clés admin côté serveur) doivent rester côté backend.
+- Le mot de passe MQTT est donc **extractible de l'APK**. Ce n'est pas un défaut de l'application,
+  c'est une propriété des variables `EXPO_PUBLIC_*` : `docs/MQTT_SECURITY.md` détaille la
+  séparation de comptes recommandée (publication / abonnement) pour limiter l'impact.
+- Les vrais secrets (clés admin, comptes de service côté backend) doivent rester côté serveur.

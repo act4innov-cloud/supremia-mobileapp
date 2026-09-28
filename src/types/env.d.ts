@@ -31,6 +31,12 @@ declare namespace NodeJS {
     EXPO_PUBLIC_MQTT_PASSWORD?: string;
     /** Topic wildcard souscrit par l'app. Guillemets obligatoires s'il contient un `#`. */
     EXPO_PUBLIC_MQTT_TOPIC?: string;
+    /**
+     * `true` pour générer des relevés en local au lieu de lire le broker.
+     * Développement et démonstration uniquement : jamais en production, car un
+     * écran de supervision affichant des mesures fictives est un danger.
+     */
+    EXPO_PUBLIC_MQTT_SIMULATE?: string;
 
     EXPO_PUBLIC_FIREBASE_API_KEY?: string;
     EXPO_PUBLIC_FIREBASE_PROJECT_ID?: string;

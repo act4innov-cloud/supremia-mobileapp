@@ -1,4 +1,4 @@
-﻿import { Stack } from 'expo-router';
+import { Stack } from 'expo-router';
 
 /**
  * En v1 l'authentification est gerÃ©e par la plateforme web dans la WebView.

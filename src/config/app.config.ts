@@ -28,6 +28,11 @@ const ENV = {
   inAppHosts: process.env.EXPO_PUBLIC_INAPP_HOSTS,
   apiUrl: process.env.EXPO_PUBLIC_API_URL,
   mqttUrl: process.env.EXPO_PUBLIC_MQTT_URL,
+  mqttUrlTls: process.env.EXPO_PUBLIC_MQTT_URL_TLS,
+  mqttUser: process.env.EXPO_PUBLIC_MQTT_USER,
+  mqttPassword: process.env.EXPO_PUBLIC_MQTT_PASSWORD,
+  mqttTopic: process.env.EXPO_PUBLIC_MQTT_TOPIC,
+  mqttSimulate: process.env.EXPO_PUBLIC_MQTT_SIMULATE,
   firebaseApiKey: process.env.EXPO_PUBLIC_FIREBASE_API_KEY,
   firebaseProjectId: process.env.EXPO_PUBLIC_FIREBASE_PROJECT_ID,
 };
@@ -58,6 +63,19 @@ function hostOf(url: string): string {
 }
 
 const webUrl = normalizeUrl(ENV.webUrl) || MISSING_WEB_URL;
+
+/* --- MQTT (valeurs dérivées, cf. le bloc `mqtt` plus bas) ------------------- */
+const mqttUrl = clean(ENV.mqttUrl, '');
+const mqttUser = clean(ENV.mqttUser, '');
+const mqttPassword = clean(ENV.mqttPassword, '');
+
+/**
+ * `true` si le broker n'est pas exploitable en l'état : URL absente, ou
+ * identifiant sans mot de passe (les brokers privés refusent alors la
+ * connexion). Permet aux écrans d'afficher la cause plutôt qu'une erreur muette.
+ */
+const MQTT_UNAVAILABLE =
+  mqttUrl.length === 0 || (mqttUser.length > 0 && mqttPassword.length === 0);
 
 export const APP_CONFIG = {
   /** Nom affiché sous l'icône. */
@@ -96,7 +114,32 @@ export const APP_CONFIG = {
   },
 
   mqtt: {
-    url: normalizeUrl(ENV.mqttUrl),
+    /**
+     * URL WebSocket. MQTT.js n'utilise que ce transport sous React Native,
+     * d'où le `wss://`. La valeur est figée ici pour être incluse dans le
+     * bundle : un accès dynamique à `process.env` ne serait pas remplacé.
+     */
+    url: mqttUrl,
+    /** URL MQTTS directe, réservée aux capteurs ESP et au backend. */
+    urlTls: clean(ENV.mqttUrlTls, ''),
+    user: mqttUser,
+    /**
+     * ⚠️ Valeur vide = connexion anonyme. Sur HiveMQ Cloud un broker privé
+     * refuse alors la connexion. Voir docs/MQTT_SECURITY.md : ce mot de passe
+     * est compilé dans l'APK et n'est donc pas secret.
+     */
+    password: mqttPassword,
+    /** Topic wildcard souscrit par l'app. */
+    topic: clean(ENV.mqttTopic, 'supremia/#'),
+    /**
+     * Génère des relevés localement au lieu de lire le broker. Sert à faire
+     * une démonstration et à développer l'interface sans capteur branché, et
+     * permet de valider les écrans pendant que l'accès broker est en attente.
+     * Passer à `false` dès que le broker réel répond.
+     */
+    simulate: clean(ENV.mqttSimulate, 'false') === 'true',
+    /** `true` si la configuration broker est inexploitable en l'état. */
+    unavailable: MQTT_UNAVAILABLE,
   },
 
   firebase: {

@@ -1,9 +1,23 @@
-﻿import { Stack } from 'expo-router';
+import { Stack } from 'expo-router';
 
 /**
- * En v1 l'app est un wrapper WebView : ce groupe n'est pas expose dans l'UI.
- * Il conserve l'arborescence prevue pour la Phase 2 (migration native).
+ * Écrans natifs de supervision.
+ *
+ * Ce groupe n'est pas l'écran d'accueil : l'application démarre sur la
+ * plateforme web (`app/index.tsx`). On y accède par l'icône de la barre
+ * d'outils, et les routes `/(tabs)/dashboard` et `/(tabs)/sensors` sont
+ * accessibles en direct pour le deep linking.
  */
 export default function Phase2Layout() {
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { backgroundColor: '#0B1220' },
+      }}
+    >
+      <Stack.Screen name="dashboard" />
+      <Stack.Screen name="sensors" />
+    </Stack>
+  );
 }

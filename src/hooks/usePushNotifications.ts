@@ -74,6 +74,11 @@ export function usePushNotifications() {
   }, []);
 
   useEffect(() => {
+    // `register` est asynchrone et son premier `await` précède tout `setState` :
+    // ce n'est donc pas une mise à jour synchrone dans l'effet, malgré ce que
+    // suppose l'analyse statique de la règle react-hooks/set-state-in-effect.
+    // L'enregistrement doit se déclencher au montage, donc il doit rester ici.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void register();
   }, [register]);
 

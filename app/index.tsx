@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
-import { BackHandler, StyleSheet, View } from 'react-native';
+import { BackHandler, Pressable, StyleSheet, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 
 import { APP_CONFIG } from '~/config';
 import { ConfigNotice } from '~/components/common/ConfigNotice';
@@ -8,13 +10,16 @@ import { WebShell, type WebShellHandle } from '~/components/common/WebShell';
 import { usePushNotifications } from '~/hooks/usePushNotifications';
 
 /**
- * Écran unique de la v1 : la plateforme web encapsulée dans une WebView.
+ * Écran d'accueil de la v1 : la plateforme web encapsulée dans une WebView.
  *
- * En Phase 2, cet écran sera remplacé par un `Redirect` vers `/(tabs)/dashboard`
- * et l'authentification passera par Firebase Auth.
+ * L'application native (capteurs, dashboard) est accessible par l'icône de
+ * mesure de la barre d'outils : la plateforme web reste le parcours principal, et
+ * la supervision native est un complément, pas un écran qui s'interpose au
+ * lancement.
  */
 export default function IndexScreen() {
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const shellRef = useRef<WebShellHandle>(null);
   const [canGoBack, setCanGoBack] = useState(false);
 
@@ -42,11 +47,28 @@ export default function IndexScreen() {
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
-      <WebShell ref={shellRef} url={APP_CONFIG.web.url} onCanGoBackChange={setCanGoBack} />
+      <WebShell
+        ref={shellRef}
+        url={APP_CONFIG.web.url}
+        onCanGoBackChange={setCanGoBack}
+        headerRight={
+          <Pressable
+            onPress={() => router.push('/(tabs)/dashboard')}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel="Ouvrir la supervision native des capteurs"
+            style={({ pressed }) => [styles.sensorsButton, pressed && styles.sensorsButtonPressed]}
+          >
+            <Ionicons name="pulse-outline" size={19} color={APP_CONFIG.colors.accent} />
+          </Pressable>
+        }
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: APP_CONFIG.colors.brand },
+  sensorsButton: { padding: 8, borderRadius: 8 },
+  sensorsButtonPressed: { backgroundColor: 'rgba(34,197,94,0.15)' },
 });

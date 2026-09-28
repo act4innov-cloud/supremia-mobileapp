@@ -1,8 +1,8 @@
 # Sécurité du broker MQTT
 
-Ce document explique un problème qui n'apparaît pas dans le code mais qui
-conditionne toute la phase 2 : **les identifiants MQTT ne peuvent pas rester
-secrets dans une application mobile.**
+Ce document explique un problème qui n'apparaît pas dans le code : **les
+identifiants MQTT ne peuvent pas rester secrets dans une application mobile.**
+Il s'applique dès maintenant, puisque l'app se connecte déjà au broker.
 
 ## Le problème
 
