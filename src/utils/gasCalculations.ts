@@ -49,9 +49,23 @@ export function normalizeStatus(raw: string | number | undefined | null): GasSta
   return 'unknown';
 }
 
-/** Statut calculé à partir de la valeur mesurée et des seuils configurés. */
+/**
+ * Statut affiché, déduit de la valeur mesurée.
+ *
+ * La priorité est explicite et c'est intentionnel :
+ *
+ *   1. une mesure absente ou non finie → `unknown`, jamais `normal`. Afficher
+ *      « conforme » pour une donnée manquante est le pire défaut possible sur
+ *      un écran de supervision ;
+ *   2. une valeur négative → `alarm`. Une concentration négative est
+ *      physiquement impossible : elle signale un capteur ou un décodage fautif,
+ *      donc une information qu'on ne peut pas annoncer comme rassurante. Le cœur de
+ *      domaine partagé applique la même règle (`getAlertLevel`) ;
+ *   3. sinon, comparaison aux seuils configurés.
+ */
 export function statusFor(kind: GasKind, value: number | null): GasStatus {
   if (value === null || !Number.isFinite(value)) return 'unknown';
+  if (value < 0) return 'alarm';
   const { warning, alarm } = GAS_THRESHOLDS[kind];
   if (value >= alarm) return 'alarm';
   if (value >= warning) return 'warning';

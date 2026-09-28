@@ -4,7 +4,9 @@
     "strict": true,
     "paths": {
       "~/*": ["./src/*"],
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@supremia/domain": ["./packages/domain/src/index.ts"],
+      "@supremia/domain/*": ["./packages/domain/src/*"]
     },
     "types": ["jest", "react"]
   },

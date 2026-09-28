@@ -16,6 +16,7 @@
     "lint": "expo lint",
     "icons": "powershell -ExecutionPolicy Bypass -File scripts/set-icon.ps1",
     "bundle:check": "expo export --platform android --output-dir dist-check",
+    "sync:check": "node packages/domain/scripts/check-sync.mjs",
     "test": "jest"
   },
   "dependencies": {
@@ -46,7 +47,8 @@
     "stream-browserify": "^3.0.0",
     "string_decoder": "^1.3.0",
     "url": "^0.11.4",
-    "util": "^0.12.5"
+    "util": "^0.12.5",
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/jest": "^29.5.14",

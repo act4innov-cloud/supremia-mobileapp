@@ -10,6 +10,7 @@
 import { parseMessage, toReading } from '~/services/mqtt';
 import { GAS_THRESHOLDS } from '~/config/gas.config';
 import { normalizeStatus, statusFor } from '~/utils/gasCalculations';
+import type { GasStatus } from '~/types/sensor.types';
 
 /** Payload réel, format confirmé par la plateforme web. */
 const PAYLOAD_VALIDE = {
@@ -79,13 +80,17 @@ describe('analyse des messages MQTT', () => {
 
   describe('seuillage des gaz', () => {
     it('classe une valeur selon les seuils configurés', () => {
-      const cas: Array<[number, string]> = [
+      // Les bornes sont lues depuis la configuration : si les seuils changent
+      // (après validation HSE, ou par alignement sur le domaine partagé), ce
+      // test continue de vérifier la règle au lieu d’un chiffre figé.
+      const { warning, alarm } = GAS_THRESHOLDS.h2s;
+      const cas: Array<[number, GasStatus]> = [
         [0, 'normal'],
-        [9.99, 'normal'],
-        [10, 'warning'],
-        [19.99, 'warning'],
-        [20, 'alarm'],
-        [100, 'alarm'],
+        [warning - 0.01, 'normal'],
+        [warning, 'warning'],
+        [alarm - 0.01, 'warning'],
+        [alarm, 'alarm'],
+        [alarm * 10, 'alarm'],
       ];
       for (const [valeur, attendu] of cas) {
         expect(statusFor('h2s', valeur)).toBe(attendu);
@@ -93,8 +98,8 @@ describe('analyse des messages MQTT', () => {
     });
 
     it('applique les seuils propres à chaque gaz', () => {
-      // 200 ppm est critique pour le CO (seuil 50) mais normal pour le CO2
-      // (seuil d’alerte 1 000).
+      // 200 ppm est critique pour le CO (STEL 200) mais normal pour le CO₂
+      // (seuil de gêne 1 000).
       expect(statusFor('co', 200)).toBe('alarm');
       expect(statusFor('co2', 200)).toBe('normal');
     });
@@ -114,12 +119,17 @@ describe('analyse des messages MQTT', () => {
 
   describe('statut global du capteur', () => {
     it('prend le pire statut parmi les trois gaz', () => {
+      // Valeurs exprimées en fraction des seuils du CO, pour que le test reste
+      // valable si les seuils sont révisés.
+      const { warning, alarm } = GAS_THRESHOLDS.co;
       const base = { ...PAYLOAD_VALIDE, h2s_ppm: 2, co_ppm: 2, co2_ppm: 400 };
       expect(toReading(base, 'supremia/data/client1', 1).status).toBe('normal');
-      expect(toReading({ ...base, co_ppm: 60 }, 'supremia/data/client1', 1).status).toBe('alarm');
-      expect(toReading({ ...base, co_ppm: 30 }, 'supremia/data/client1', 1).status).toBe(
-        'warning',
-      );
+      expect(
+        toReading({ ...base, co_ppm: alarm + 1 }, 'supremia/data/client1', 1).status
+      ).toBe('alarm');
+      expect(
+        toReading({ ...base, co_ppm: warning + 1 }, 'supremia/data/client1', 1).status
+      ).toBe('warning');
     });
 
     it('ignore un topic de statut, qui ne porte pas de mesures', () => {

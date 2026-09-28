@@ -11,6 +11,13 @@ module.exports = {
   // module natif : on les exécute en Node pour rester rapide.
   testEnvironment: 'node',
   testMatch: ['<rootDir>/__tests__/**/*.test.ts'],
+  // Le cœur de domaine est résolu comme le fait Metro, via les chemins du
+  // tsconfig. Sans ce mapping, Jest ne le trouverait pas alors que le bundle
+  // Android le trouve : les tests valideraient autre chose que l'app.
+  moduleNameMapper: {
+    '^@supremia/domain$': '<rootDir>/packages/domain/src/index.ts',
+    '^@supremia/domain/(.*)$': '<rootDir>/packages/domain/src/$1',
+  },
   collectCoverageFrom: [
     'src/services/**/*.ts',
     'src/config/**/*.ts',
