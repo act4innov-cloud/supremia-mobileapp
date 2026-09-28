@@ -130,7 +130,7 @@ export const APP_CONFIG = {
      */
     password: mqttPassword,
     /** Topic wildcard souscrit par l'app. */
-    topic: clean(ENV.mqttTopic, 'supremia/#'),
+    topic: clean(ENV.mqttTopic, 'supremia/data/#'),
     /**
      * Génère des relevés localement au lieu de lire le broker. Sert à faire
      * une démonstration et à développer l'interface sans capteur branché, et

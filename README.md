@@ -167,14 +167,14 @@ dès que le broker répond.
 ## Broker MQTT
 
 L'app se connecte à HiveMQ Cloud en WebSocket (`wss://`, seul transport supporté sous React Native)
-et s'abonne à `supremia/#`.
+et s'abonne à `supremia/data/#`.
 
 ```ini
 EXPO_PUBLIC_MQTT_URL=wss://<cluster>.s1.eu.hivemq.cloud:8884/mqtt
 EXPO_PUBLIC_MQTT_URL_TLS=mqtts://<cluster>.s1.eu.hivemq.cloud:8883   # capteurs + backend
 EXPO_PUBLIC_MQTT_USER=
 EXPO_PUBLIC_MQTT_PASSWORD=""
-EXPO_PUBLIC_MQTT_TOPIC="supremia/#"
+EXPO_PUBLIC_MQTT_TOPIC="supremia/data/#"
 ```
 
 > ⚠️ **Guillemets obligatoires** autour du topic et du mot de passe : sans eux, le lecteur de `.env`

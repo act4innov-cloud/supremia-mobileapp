@@ -73,7 +73,7 @@ depuis le SDK 53 : il faut un *development build* (`eas build --profile developm
 ### `src/services/mqtt.ts`
 Client MQTT unique partagé par tous les écrans, ouvert au premier abonnement et refermé au dernier.
 Se connecter par écran multiplierait les connexions chez le broker, ce que les offres free-tier
-sanctionnent. Le module encapsule la reconnexion, l'abonnement à `supremia/#` et la normalisation
+sanctionnent. Le module encapsule la reconnexion, l'abonnement à `supremia/data/#` et la normalisation
 des messages.
 
 **mqtt.js est un paquet Node.** Il attend `stream`, `buffer`, `url`, `events`… qui n'existent pas

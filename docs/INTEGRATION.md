@@ -126,7 +126,7 @@ Sur le cluster `b7f86ed7` :
 
 1. L'utilisateur `supremia` **existe** et n'a pas été supprimé.
 2. Son **statut** est *enabled*, et son **invitation a été acceptée**.
-3. L'utilisateur a le droit de **s'abonner** à `supremia/#`. Un utilisateur sans droit
+3. L'utilisateur a le droit de **s'abonner** à `supremia/data/#`. Un utilisateur sans droit
    d'abonnement est refusé dès l'étape CONNECT, avec le même message que pour un mot de passe faux.
 4. L'essai n'a pas expiré.
 
@@ -150,7 +150,7 @@ accéder à vos identifiants.
 |---|---|
 | Broker WebSocket | `wss://b7f86ed758d34f50b801c7ca5e52951e.s1.eu.hivemq.cloud:8884/mqtt` |
 | Broker TLS direct | `mqtts://b7f86ed758d34f50b801c7ca5e52951e.s1.eu.hivemq.cloud:8883` |
-| Topic | `supremia/#` (donc `supremia/data/<client>`) |
+| Topic | `supremia/data/#` (donc `supremia/data/<client>`) |
 | Client ID | préfixe libre ; l'app utilise `ocp_mobile_*` |
 | Client MQTT | mqtt.js 5, `clean: true`, keepalive 60 s, reconnexion toutes les 5 s |
 | Champs du payload | `sensor_name`, `sensor_id`, `type`, `location`, `temperature`, `humidity`, `h2s_ppm`, `co_ppm`, `co2_ppm`, `h2s_status`, `co_status`, `co2_status`, `status`, `wifi_rssi`, `publish_count` |

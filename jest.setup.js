@@ -10,5 +10,5 @@ process.env.EXPO_PUBLIC_WEB_URL = 'https://suprem-ia.netlify.app';
 process.env.EXPO_PUBLIC_MQTT_URL = 'wss://broker.test:8884/mqtt';
 process.env.EXPO_PUBLIC_MQTT_USER = 'utilisateur-test';
 process.env.EXPO_PUBLIC_MQTT_PASSWORD = 'motdepasse-test';
-process.env.EXPO_PUBLIC_MQTT_TOPIC = 'supremia/#';
+process.env.EXPO_PUBLIC_MQTT_TOPIC = 'supremia/data/#';
 process.env.EXPO_PUBLIC_MQTT_SIMULATE = 'false';

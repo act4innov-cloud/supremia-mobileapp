@@ -35,7 +35,7 @@ Il faut **deux comptes séparés**, jamais un seul partagé :
 | Compte | Usage | Droits |
 |---|---|---|
 | `supremia-sensor-*` | publication depuis les ESP | **publish** uniquement, sur `supremia/data/#` |
-| `supremia-mobile` | application Android et site web | **subscribe** uniquement, sur `supremia/#` |
+| `supremia-mobile` | application Android et site web | **subscribe** uniquement, sur `supremia/data/#` |
 
 Avec cette séparation, un mot de passe extrait de l'APK ne permet que de **lire**
 les données. Il ne permet plus d'écrire. C'est la différence entre une fuite de
@@ -71,16 +71,18 @@ Réduire la surface d'écoute autant que possible :
 
 | Topic | Contenu | Abonné par l'app |
 |---|---|---|
-| `supremia/#` | tout (joker) | à éviter en production |
+| `supremia/data/#` | tous les relevés (joker sous `data/`) | **oui, topic officiel** |
 | `supremia/data/client1` | relevé complet d'un capteur | oui |
 | `supremia/data/client1/temp` | température seule | redondant, le relevé complet suffit |
 | `supremia/data/client1/humidity` | humidité seule | redondant |
-| `supremia/status/client1` | état de l'appareil | utile pour la disponibilité |
+| `supremia/#` | tout, y compris config et statut | trop large, ne pas l'utiliser |
+| `supremia/status/client1` | état de l'appareil | hors périmètre de l'app |
 
-`supremia/#` est celui que la plateforme web utilise aujourd'hui. Il est
-fonctionnel mais dépend d'un thème : dès qu'un capteur publie ailleurs sous
-`supremia/`, l'app le verra. Préférer un explicitement versionné, par exemple
-`supremia/v1/data/#`, et faire migrer les capteurs.
+`supremia/data/#` est le topic officiel de la plateforme. C'est le bon compromis :
+il couvre tous les capteurs, y compris ceux ajoutés plus tard, sans faire remonter
+les topics de configuration ou de statut. Un préfixe encore plus strict, versionné
+(par exemple `supremia/v1/data/#`), serait préférable à terme mais impose de
+faire migrer les capteurs.
 
 ## Points à faire avant la production
 
@@ -89,6 +91,6 @@ fonctionnel mais dépend d'un thème : dès qu'un capteur publie ailleurs sous
 - [ ] Ne plus utiliser le même compte pour l'app et pour les capteurs
 - [ ] Définir des ACL par topic, pas seulement par action
 - [ ] Configurer un renouvellement de mot de passe sans redéploiement de l'app
-- [ ] Remplacer `supremia/#` par un préfixe versionné
+- [ ] Remplacer `supremia/data/#` par un préfixe versionné
 - [ ] Activer la rétention et le quota de débit sur le cluster
 - [ ] Brancher les alertes HiveMQ vers votre canal d'astreinte
